@@ -1,0 +1,8 @@
+# Emacs stuff
+*~
+
+# Js stuff
+node_modules/
+
+# TOKEN
+.env

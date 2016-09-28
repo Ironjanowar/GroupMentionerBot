@@ -1,0 +1,26 @@
+{
+    "name": "Group_Mentioner_Bot",
+    "version": "0.0.1",
+    "description": "TelegramBot for mentioning groups of people",
+    "license": "Apache-2.0",
+    "contributors": [
+        {
+            "name": "Cesar Guzman Alpizar",
+            "email": "ironjanowar@gmail.com",
+            "url": "https://github.com/Ironjanowar"
+        }
+    ],
+    "keywords": [
+        "bot",
+        "telegram"
+    ],
+    "main": "bot.js",
+    "dependencies": {
+        "dotenv": "^2.0.0",
+        "node-telegram-bot-api": "0.23.3",
+        "elasticsearch": "*"
+    },
+    "scripts": {
+        "start": "node bot.js"
+    }
+}
