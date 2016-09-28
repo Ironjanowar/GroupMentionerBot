@@ -1,6 +1,9 @@
 # Emacs stuff
 *~
 
+# Data
+data/
+
 # Js stuff
 node_modules/
 
