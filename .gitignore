@@ -2,7 +2,7 @@
 *~
 
 # Data
-data/
+data/groups.json
 
 # Js stuff
 node_modules/
