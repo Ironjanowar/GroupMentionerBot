@@ -1,3 +1,5 @@
+"use strict";
+
 // Requires
 var jsonfile = require("./data/groups.json");
 var fs = require('fs');
@@ -28,22 +30,23 @@ var saveGroups = function saveGroups(groups) {
         if(err) {
             return console.log(err);
         }
+	jsonfile = require("./data/groups.json");
     });
 };
 
 // Creates a new group
 var createGroup = function createGroup(message, group) {
-    var groupName = group.substring(1);
-    if (!group.startsWith("@")) {
+    var groupName = group[1].substring(1);
+    if (!group[1].startsWith("@")) {
         bot.sendMessage(message.chat.id, "El grupo tiene que empezar por '@'");
-    } else if (jsonfile[group] != undefined) {
+    } else if (jsonfile[group[1]] != undefined) {
         bot.sendMessage(message.chat.id, "Ese grupo ya existe!");
-    } else if (groupName.match(/[A-Z]|[a-z]|[0-9]/g)) {
+    } else if (!groupName.match(/[A-Z]|[a-z]|[0-9]/g)) {
         bot.sendMessage(message.chat.id, "Ese no es un alias valido!");
     } else {
-        jsonfile[group] = [];
+        jsonfile[group[1]] = [];
         saveGroups(jsonfile);
-        bot.sendMessage(message.chat.id, "Grupo creado con el nombre: " + group);
+        bot.sendMessage(message.chat.id, "Grupo creado con el nombre: " + group[1]);
     }
 };
 
@@ -53,10 +56,61 @@ var dropGroups = function dropGroups(message) {
     bot.sendMessage(message.chat.id, "The bass has been dropped!");
 };
 
+// Catches generic replies
+var catchReply = function catchReply(callback, message) {
+    bot.onReplyToMessage(message.chat.id, message.message_id, callback);
+};
+
+// Reply markup to force reply a message
+var options = {
+    reply_markup : JSON.stringify({ force_reply: true })
+};
+
 // Adds user to group
-var addUser = function addUser(message, match) {
-    
-}
+var addUser = function addUser(message) {
+    bot.sendMessage(message.chat.id, "Que usuario quieres añadir?", options).then(catchReply.bind(null, getUserToAdd));
+};
+
+// Gets the user we want to add to a group
+var getUserToAdd = function getUserToAdd(message) {
+    if (!message.text.startsWith("@")) {
+        bot.sendMessage(message.chat.id, "El alias tiene que empezar por '@'");
+    } else {
+        bot.sendMessage(message.chat.id, "Okkay!\nA que grupo quieres añadir ese usuario?", options).then(catchReply.bind(null, getGroupToAdd.bind(null ,message.text)));
+    }
+};
+
+var getGroupToAdd = function getGroupToAdd(user, message) {
+    var group = message.text
+    var groupName = group.substring(1);
+    if (!group.startsWith("@")) {
+        bot.sendMessage(message.chat.id, "El grupo tiene que empezar por '@'");
+    } else if (!groupName.match(/[A-Z]|[a-z]|[0-9]/g)) {
+        bot.sendMessage(message.chat.id, "Ese no es un alias valido!");
+    } else {
+        jsonfile[group].push(user);
+        saveGroups(jsonfile);
+        bot.sendMessage(message.chat.id, "El usuario " + user + " ha sido aniadido al grupo " + group);
+    }
+};
+
+// Mentions all users of a group
+var mentionGroup = function mentionGroup(message) {
+    var text = message.text.split(" ");
+    var messageToSend = "";
+    for (let word of text) {
+	if (word.startsWith("@")) {
+	    if (jsonfile[word] != undefined) {
+		for (let name of jsonfile[word]) {
+		    messageToSend += name + " ";
+		}
+
+		messageToSend += "This!";
+		bot.sendMessage(message.chat.id, messageToSend, { reply_to_message_id: message.message_id });
+	    }
+	}
+    }
+};
 
 // Handlers
 // Help
@@ -69,7 +123,10 @@ bot.onText(/^\/create (.+)/, createGroup);
 bot.onText(/^\/drop$/, dropGroups);
 
 // Adds user to group
-bot.onText(/^\/add (.+)/, addUser);
+bot.onText(/^\/adduser$/, addUser);
+
+// Mention all users needed
+bot.onText(/@/g, mentionGroup);
 
 // Mmmeh
 console.log("Running...");
