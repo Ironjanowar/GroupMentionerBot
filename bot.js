@@ -37,8 +37,8 @@ var saveGroups = function saveGroups(groups) {
 // Creates a new group
 var createGroup = function createGroup(message, group) {
     var groupName = group[1].substring(1);
-    if (!group[1].startsWith("@")) {
-        bot.sendMessage(message.chat.id, "El grupo tiene que empezar por '@'");
+    if (!group[1].startsWith("#")) {
+        bot.sendMessage(message.chat.id, "El grupo tiene que empezar por '#'");
     } else if (jsonfile[group[1]] != undefined) {
         bot.sendMessage(message.chat.id, "Ese grupo ya existe!");
     } else if (!groupName.match(/[A-Z]|[a-z]|[0-9]/g)) {
@@ -48,12 +48,6 @@ var createGroup = function createGroup(message, group) {
         saveGroups(jsonfile);
         bot.sendMessage(message.chat.id, "Grupo creado con el nombre: " + group[1]);
     }
-};
-
-// Drops da' bass
-var dropGroups = function dropGroups(message) {
-    saveGroups({});
-    bot.sendMessage(message.chat.id, "The bass has been dropped!");
 };
 
 // Catches generic replies
@@ -83,8 +77,8 @@ var getUserToAdd = function getUserToAdd(message) {
 var getGroupToAdd = function getGroupToAdd(user, message) {
     var group = message.text
     var groupName = group.substring(1);
-    if (!group.startsWith("@")) {
-        bot.sendMessage(message.chat.id, "El grupo tiene que empezar por '@'");
+    if (!group.startsWith("#")) {
+        bot.sendMessage(message.chat.id, "El grupo tiene que empezar por '#'");
     } else if (!groupName.match(/[A-Z]|[a-z]|[0-9]/g)) {
         bot.sendMessage(message.chat.id, "Ese no es un alias valido!");
     } else {
@@ -100,8 +94,8 @@ var mentionGroup = function mentionGroup(message) {
         var text = message.text.split(" ");
         var messageToSend = "";
         for (let word of text) {
-            if (word.startsWith("@")) {
-                if (jsonfile[word] != undefined) {
+            if (word.startsWith("#")) {
+                if (jsonfile[word] != null) {
                     for (let name of jsonfile[word]) {
                         messageToSend += name + " ";
                     }
@@ -135,14 +129,11 @@ bot.onText(/^\/help$/, sendHelp);
 // Create group
 bot.onText(/^\/create (.+)/, createGroup);
 
-// Drop groups
-bot.onText(/^\/drop$/, dropGroups);
-
 // Adds user to group
 bot.onText(/^\/adduser$/, addUser);
 
 // Mention all users needed
-bot.onText(/@/g, mentionGroup);
+bot.onText(/#/g, mentionGroup);
 
 // Shows the current groups
 bot.onText(/^\/groups$/, showGroups)
