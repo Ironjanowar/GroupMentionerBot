@@ -30,7 +30,7 @@ var saveGroups = function saveGroups(groups) {
         if(err) {
             return console.log(err);
         }
-	jsonfile = require("./data/groups.json");
+        jsonfile = require("./data/groups.json");
     });
 };
 
@@ -96,19 +96,35 @@ var getGroupToAdd = function getGroupToAdd(user, message) {
 
 // Mentions all users of a group
 var mentionGroup = function mentionGroup(message) {
-    var text = message.text.split(" ");
-    var messageToSend = "";
-    for (let word of text) {
-	if (word.startsWith("@")) {
-	    if (jsonfile[word] != undefined) {
-		for (let name of jsonfile[word]) {
-		    messageToSend += name + " ";
-		}
+    if (!message.text.startsWith("/")) {
+        var text = message.text.split(" ");
+        var messageToSend = "";
+        for (let word of text) {
+            if (word.startsWith("@")) {
+                if (jsonfile[word] != undefined) {
+                    for (let name of jsonfile[word]) {
+                        messageToSend += name + " ";
+                    }
 
-		messageToSend += "This!";
-		bot.sendMessage(message.chat.id, messageToSend, { reply_to_message_id: message.message_id });
-	    }
-	}
+                    messageToSend += "This!";
+                    bot.sendMessage(message.chat.id, messageToSend, { reply_to_message_id: message.message_id });
+                }
+            }
+        }
+    }
+};
+
+// Show groups
+var showGroups = function showGroups(message) {
+    if (Object.keys(jsonfile).length === 0) {
+        bot.sendMessage(message.chat.id, "No hay grupos creados, crea uno con /create [nombre del grupo]")
+    } else {
+        var groupNames = "Los grupos actuales que hay son:\n";
+        for (let name in jsonfile) {
+            groupNames += "  " + name + "\n";
+        }
+
+        bot.sendMessage(message.chat.id, groupNames);
     }
 };
 
@@ -127,6 +143,9 @@ bot.onText(/^\/adduser$/, addUser);
 
 // Mention all users needed
 bot.onText(/@/g, mentionGroup);
+
+// Shows the current groups
+bot.onText(/^\/groups$/, showGroups)
 
 // Mmmeh
 console.log("Running...");
